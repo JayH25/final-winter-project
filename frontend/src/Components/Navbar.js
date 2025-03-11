@@ -1,9 +1,9 @@
 import React from "react";
 
-const Navbar = ({isLoggedIn, setIsLoggedIn}) => {
-  const handleSignout = () => {
-    setIsLoggedIn(false);
-  }
+const Navbar = ({handleSignout}) => {
+  // const handleSignout = () => {
+  //   setIsLoggedIn(false);
+  // }
   return (
     <div className="navbar">
       <h1 className="logo">Auto Job Filler</h1>

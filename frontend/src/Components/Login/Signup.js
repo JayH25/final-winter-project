@@ -61,44 +61,91 @@ const Signup = ({ onSignupSuccess, onBackToLogin }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!validateForm()) {
+//         return;
+//     }
+
+//     setIsLoading(true);
+
+//     try {
+//         const response = await fetch("http://localhost:5000/user/signup", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json"
+//             },
+//             body: JSON.stringify({
+//                 fullName: formData.fullName,
+//                 email: formData.email,
+//                 password: formData.password
+//             })
+//         });
+
+//         const data = await response.json();
+
+//         if (!response.ok) {
+//             throw new Error(data.error || "Signup failed");
+//         }
+
+//         // Use Chrome storage for persistence
+//         if (typeof chrome !== "undefined" && chrome.storage) {
+//             chrome.storage.local.set({ userData: data, isLoggedIn: true }, () => {
+//                 console.log("User registered and logged in");
+//             });
+//         }
+
+//         onSignupSuccess();
+//     } catch (error) {
+//         console.error("Signup error:", error);
+//         setErrors({ general: error.message });
+//     } finally {
+//         setIsLoading(false);
+//     }
+// };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) {
       return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      // For demo purposes, simulate API call with timeout
-      // Replace this with your actual signup API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful signup
-      // In a real app, you would send user data to your backend
-      const userData = {
-        fullName: formData.fullName,
-        email: formData.email,
-        signupDate: new Date().toISOString()
-      };
-      
-      // Use Chrome storage for persistence
-      if (typeof chrome !== 'undefined' && chrome.storage) {
-        chrome.storage.local.set({ userData, isLoggedIn: true }, () => {
-          console.log('User registered and logged in');
-        });
+  }
+
+  setIsLoading(true);
+
+  try {
+      const response = await fetch("http://localhost:5000/user/signup", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+              fullName: formData.fullName,
+              email: formData.email,
+              password: formData.password
+          })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          throw new Error(data.error || "Signup failed");
       }
-      
-      // Notify parent component of successful signup
-      onSignupSuccess();
-    } catch (error) {
-      console.error('Signup error:', error);
-      setErrors({ general: 'Registration failed. Please try again.' });
-    } finally {
+
+      console.log("Signup successful:", data);
+      alert("Account created successfully! Please log in.");
+      onBackToLogin(); // ✅ Redirect to login
+
+  } catch (error) {
+      console.error("Signup error:", error);
+      setErrors({ general: error.message });
+  } finally {
       setIsLoading(false);
-    }
-  };
+  }
+};
+
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

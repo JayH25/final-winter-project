@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose=require("mongoose");
 const parseResumeRoute = require("./routes/parseResume");
+const userRoute=require("./routes/user");
 
 const app = express();
 const PORT = 5000;
@@ -9,7 +11,11 @@ const PORT = 5000;
 app.use(cors()); // Allows requests from the frontend
 app.use(express.json());
 
+mongoose.connect("mongodb://127.0.0.1:27017/user").then(() => console.log("MongoDB connected successfully"))
+.catch(err => console.error("MongoDB connection error:", err));
+
 // Routes
+app.use("/user",userRoute);
 app.use("/api", parseResumeRoute);
 
 // Start Server

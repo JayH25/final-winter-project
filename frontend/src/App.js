@@ -6,9 +6,9 @@ import axios from "axios";
 import ParsedDataDisplay from './Components/ParsedDataDisplay';
 import Navbar from './Components/Navbar';
 import CentreContent from './Components/CentreContent';
-import Login from './Components/Login/login';
+import Login from './Components/Login/Login';
 
-const App = () => {
+function App() {
   const [file, setFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,9 +61,9 @@ const App = () => {
       alert("No parsed data to save.");
       return;
     }
-  
+
     chrome.storage.local.set({ parsedData }, () => {
-      console.log("Parsed data saved to storage:", parsedData);  // For debugging
+      console.log("Parsed data saved to storage:", parsedData); // For debugging
       alert("Parsed data saved for autofill!");
     });
   };
@@ -81,35 +81,36 @@ const App = () => {
   };
   const handleLogout = () => {
     setIsLoggedIn(false);
+    // Update Chrome Storage so it persists across extension reloads
+    chrome.storage.local.set({ isLoggedIn: false }, () => {
+      console.log("User logged out, state updated in storage");
+    });
   };
 
   // Return statement with the correct ternary operator
   return isLoggedIn ? (
     <div className="app-container">
       <Navbar
-        isLoggedIn={isLoading}
+        isLoggedIn={isLoggedIn}
         setIsLoggedIn={setIsLoggedIn}
-      
-      />
+        handleSignout={handleLogout} />
 
       {/* Center Content */}
-      <CentreContent 
-        parsedData={parsedData} 
-        file={file} 
-        isLoading={isLoading} 
-        handleFileUpload={handleFileUpload} 
-        handleFileChange={handleFileChange} 
-      />
+      <CentreContent
+        parsedData={parsedData}
+        file={file}
+        isLoading={isLoading}
+        handleFileUpload={handleFileUpload}
+        handleFileChange={handleFileChange} />
 
-      <ParsedDataDisplay  
-        parsedData={parsedData} 
-        handleSaveToStorage={handleSaveToStorage} 
-        handleAutofill={handleAutofill} 
-      />
+      <ParsedDataDisplay
+        parsedData={parsedData}
+        handleSaveToStorage={handleSaveToStorage}
+        handleAutofill={handleAutofill} />
     </div>
   ) : (
     <Login onLoginSuccess={handleLoginSuccess} />
   );
-};
+}
 
 export default App;
