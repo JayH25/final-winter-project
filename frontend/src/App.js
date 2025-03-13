@@ -68,12 +68,63 @@ function App() {
     });
   };
 
+  const handleSaveToDashboard = async () => {
+    if (!isLoggedIn) {
+      alert("Please log in to save to your dashboard.");
+      return;
+    }
+  
+    if (!parsedData) {
+      alert("No parsed data to save.");
+      return;
+    }
+  
+    try {
+      // Get user data from Chrome storage to get the user ID
+      const data = await new Promise((resolve) => {
+        chrome.storage.local.get("userData", resolve);
+      });
+  
+      const userId = data.userData?.user?._id;
+      if (!userId) {
+        alert("User ID is missing. Please log in again.");
+        return;
+      }
+  
+      // Send parsed data and user ID to the backend to save it
+      const response = await axios.post("http://localhost:5000/api/save-parsed-resume", {
+        userId,
+        parsedData,
+      });
+  
+      alert("Parsed resume saved successfully!");
+      console.log("Updated parsed resumes:", response.data.parsedResumes);
+    } catch (error) {
+      console.error("Error saving parsed resume:", error);
+      alert("Failed to save parsed resume.");
+    }
+  };
+
   // Trigger autofill on current webpage by sending message to content script
   const handleAutofill = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { action: "autofill" });
+      // Ensure the active tab exists
+      if (tabs.length > 0) {
+        console.log(tabs);  // Log the tabs array to check if the active tab is found
+
+        chrome.tabs.sendMessage(tabs[0].id, { action: "autofill" }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("Error sending message:", chrome.runtime.lastError);
+          } else {
+            console.log("Message sent successfully to content script");
+          }
+        });
+      } else {
+        console.error("No active tab found");
+      }
     });
   };
+  
 
   // Add this to handle login success
   const handleLoginSuccess = () => {
@@ -106,7 +157,9 @@ function App() {
       <ParsedDataDisplay
         parsedData={parsedData}
         handleSaveToStorage={handleSaveToStorage}
-        handleAutofill={handleAutofill} />
+        handleAutofill={handleAutofill} 
+        handleSaveToDashboard={handleSaveToDashboard}
+         />
     </div>
   ) : (
     <Login onLoginSuccess={handleLoginSuccess} />

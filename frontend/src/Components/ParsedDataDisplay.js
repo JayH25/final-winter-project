@@ -1,7 +1,7 @@
 // ParsedDataDisplay.js
 import React from 'react';
 
-const ParsedDataDisplay = ({ parsedData, handleSaveToStorage, handleAutofill }) => {
+const ParsedDataDisplay = ({ parsedData, handleSaveToStorage, handleAutofill ,handleSaveToDashboard}) => {
   return (
     parsedData && (
       <div className='Content'>
@@ -15,7 +15,7 @@ const ParsedDataDisplay = ({ parsedData, handleSaveToStorage, handleAutofill }) 
             Autofill Forms
           </button>
         </div>
-        <button className="dashboard">Go To Dashboard</button>
+        <button onClick={handleSaveToDashboard} className="dashboard">Save To Dashboard</button>
       </div>
     )
   );

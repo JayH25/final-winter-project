@@ -2,6 +2,9 @@ const express = require("express");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const fs = require("fs");
+const User = require("../models/user"); // Import User model
+
+
 
 const router = express.Router();
 
@@ -51,5 +54,39 @@ const extractPhone = (text) => {
   const match = text.match(/(\+?\d{1,2}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
   return match ? match[0] : "N/A";
 };
+
+
+router.post('/save-parsed-resume', async (req, res) => {
+  const { userId, parsedData } = req.body;
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Create a new parsed resume with a title and current date
+    const newParsedResume = {
+      title: `Resume ${user.parsedResumes.length + 1}`,  // Title based on the number of existing resumes
+      date: new Date(),
+      parsedData: parsedData,  // The parsed resume data
+    };
+
+    // Push the new parsed resume to the user's parsedResumes array
+    user.parsedResumes.push(newParsedResume);
+
+    // Save the user document with the updated parsedResumes
+    await user.save();
+
+    // Send the updated parsed resumes back in the response
+    res.json({ message: 'Parsed resume saved successfully!', parsedResumes: user.parsedResumes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to save parsed resume.' });
+  }
+});
+
+
 
 module.exports = router;
