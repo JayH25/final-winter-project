@@ -1,6 +1,19 @@
-import React from 'react'
+/* global chrome */
+import React from 'react';
 
-const CentreContent=({parsedData,isLoading,file,handleFileChange,handleFileUpload})=> {
+const CentreContent = ({ parsedData, isLoading, file, handleFileChange, handleFileUpload, userId }) => {
+  
+  const handleGoToDashboard = () => {
+    if (!userId) {
+      alert("User ID is missing. Please log in again.");
+      return;
+    }
+
+    console.log("Opening Dashboard via Chrome extension API...");
+    chrome.tabs.create({ url: `http://localhost:5000/user/${userId}` });
+  };
+  
+  
   return (
     <div className="center-content">
         <div>
@@ -10,7 +23,7 @@ const CentreContent=({parsedData,isLoading,file,handleFileChange,handleFileUploa
             alt="File Preview"
           />
         </div>
-        <h2>{parsedData? parsedData.fileName : (!file)? "Select File":"Confirm Upload"}</h2>
+        <h2>{parsedData ? parsedData.fileName : (!file) ? "Select File" : "Confirm Upload"}</h2>
         <div className="select-upload-buttons">
           <label className="choose-btn">
             Choose File
@@ -28,9 +41,11 @@ const CentreContent=({parsedData,isLoading,file,handleFileChange,handleFileUploa
           >
             {isLoading ? "Uploading..." : "Upload and Parse Resume"}
           </button>
+
+          <button onClick={handleGoToDashboard} className="dashboard">Go To Dashboard</button>
         </div>
       </div>
-  )
-}
+  );
+};
 
 export default CentreContent;

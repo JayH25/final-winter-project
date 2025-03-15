@@ -58,6 +58,7 @@ const extractPhone = (text) => {
 
 router.post('/save-parsed-resume', async (req, res) => {
   const { userId, parsedData } = req.body;
+
   try {
     // Find the user by ID
     const user = await User.findById(userId);
@@ -66,25 +67,42 @@ router.post('/save-parsed-resume', async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Create a new parsed resume with a title and current date
-    const newParsedResume = {
-      title: `Resume ${user.parsedResumes.length + 1}`,  // Title based on the number of existing resumes
-      date: new Date(),
-      parsedData: parsedData,  // The parsed resume data
+    // Assign (or replace) the parsedResume data
+    user.parsedResume = {
+      name: parsedData.name,
+      email: parsedData.email,
+      phone: parsedData.phone,
     };
 
-    // Push the new parsed resume to the user's parsedResumes array
-    user.parsedResumes.push(newParsedResume);
-
-    // Save the user document with the updated parsedResumes
+    // Save the updated user document
     await user.save();
 
-    // Send the updated parsed resumes back in the response
-    res.json({ message: 'Parsed resume saved successfully!', parsedResumes: user.parsedResumes });
+    // Send the updated parsed resume back in the response
+    res.json({ message: 'Parsed resume saved successfully!', parsedResume: user.parsedResume });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to save parsed resume.' });
   }
+});
+
+
+router.post('/', async (req, res) => {
+  try {
+      const { userId } = req.body; // Get user ID from frontend
+      const user = await User.findById(userId);
+
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ parsedResumes: user.parsedResumes });
+  } catch (error) {
+      res.status(500).json({ message: "Server Error", error });
+  }
+});
+
+router.get("/", (req, res) => {
+  res.send("Working");
 });
 
 

@@ -14,17 +14,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    parsedResumes: [
-        {
-            title: { type: String },
-            date: { type: Date },
-            parsedData: {
-                name: { type: String },
-                email: { type: String },
-                phone: { type: String },
-            },
-        },
-    ],
+    parsedResume: {  // Single resume object instead of an array
+        name: { type: String },
+        email: { type: String },
+        phone: { type: String },
+    },
 });
 
 const User = mongoose.model('User', userSchema);

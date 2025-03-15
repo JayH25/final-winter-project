@@ -9,18 +9,27 @@ import CentreContent from './Components/CentreContent';
 import Login from './Components/Login/Login';
 
 function App() {
+  
   const [file, setFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const[userID,setUserId] = useState(null);
+ 
 
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.storage) {
-      chrome.storage.local.get('isLoggedIn', (data) => {
+      chrome.storage.local.get(['isLoggedIn', 'userData'], (data) => {
         setIsLoggedIn(data.isLoggedIn || false);
+        if (data.userData) {
+          console.log("Retrieved userData from storage:", data.userData);
+          setUserId(data.userData.user?._id || null);
+        }
       });
     }
   }, []);
+  
+
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -86,6 +95,7 @@ function App() {
       });
   
       const userId = data.userData?.user?._id;
+    
       if (!userId) {
         alert("User ID is missing. Please log in again.");
         return;
@@ -105,6 +115,11 @@ function App() {
     }
   };
 
+
+ 
+  
+
+  
   // Trigger autofill on current webpage by sending message to content script
   const handleAutofill = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -128,8 +143,18 @@ function App() {
 
   // Add this to handle login success
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
+    chrome.storage.local.get(['isLoggedIn', 'userData'], (data) => {
+      if (data.isLoggedIn && data.userData) {
+        console.log("User logged in, retrieved from storage:", data.userData);
+        setIsLoggedIn(true);
+        setUserId(data.userData.user?._id || null);
+      } else {
+        console.warn("Login data missing in Chrome storage.");
+      }
+    });
   };
+  
+  
   const handleLogout = () => {
     setIsLoggedIn(false);
     // Update Chrome Storage so it persists across extension reloads
@@ -152,7 +177,9 @@ function App() {
         file={file}
         isLoading={isLoading}
         handleFileUpload={handleFileUpload}
-        handleFileChange={handleFileChange} />
+        handleFileChange={handleFileChange}
+        userId={userID}
+        />
 
       <ParsedDataDisplay
         parsedData={parsedData}
