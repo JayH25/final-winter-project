@@ -75,6 +75,7 @@ function App() {
       console.log("Parsed data saved to storage:", parsedData); // For debugging
       alert("Parsed data saved for autofill!");
     });
+    console.log(parsedData);
   };
 
   const handleSaveToDashboard = async () => {

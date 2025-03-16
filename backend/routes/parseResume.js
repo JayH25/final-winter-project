@@ -2,37 +2,31 @@ const express = require("express");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const fs = require("fs");
-const User = require("../models/user"); // Import User model
-
-
+const User = require("../models/user");
 
 const router = express.Router();
-
-// Configure Multer for file uploads
 const upload = multer({ dest: "uploads/" });
 
-// POST route to parse resume
 router.post("/parse-resume", upload.single("resume"), async (req, res) => {
   try {
-    // Read the uploaded file
     const filePath = req.file.path;
     const fileBuffer = fs.readFileSync(filePath);
-
-    // Parse the PDF file
     const pdfData = await pdfParse(fileBuffer);
 
-    // Example parsing logic (basic demo)
     const extractedData = {
-      fileName:req.file.originalname,
+      fileName: req.file.originalname,
       name: extractName(pdfData.text),
       email: extractEmail(pdfData.text),
       phone: extractPhone(pdfData.text),
+      linkedIn: extractLinkedIn(pdfData.text),
+      github: extractGitHub(pdfData.text),
+      skills: extractSkills(pdfData.text),
+      workExperience: extractWorkExperience(pdfData.text),
+      education: extractEducation(pdfData.text),
     };
 
-    // Delete the file after parsing
     fs.unlinkSync(filePath);
 
-    // Respond with the parsed data
     res.status(200).json(extractedData);
   } catch (err) {
     res.status(500).json({ error: "Failed to parse resume." });
@@ -55,56 +49,51 @@ const extractPhone = (text) => {
   return match ? match[0] : "N/A";
 };
 
+const extractLinkedIn = (text) => {
+  const match = text.match(/(https?:\/\/(www\.)?linkedin\.com\/[^\s]+)/);
+  return match ? match[0] : "N/A";
+};
 
-router.post('/save-parsed-resume', async (req, res) => {
-  const { userId, parsedData } = req.body;
+const extractGitHub = (text) => {
+  const match = text.match(/(https?:\/\/(www\.)?github\.com\/[^\s]+)/);
+  return match ? match[0] : "N/A";
+};
 
-  try {
-    // Find the user by ID
-    const user = await User.findById(userId);
+const extractSkills = (text) => {
+  const match = text.match(/Skills:([\s\S]*?)(?=\n\n|\n[A-Z])/);
+  return match ? match[1].trim().split(/,\s*/) : [];
+};
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
+const extractWorkExperience = (text) => {
+  const match = text.match(/Experience:(.*?)Education:/s);
+  if (!match) return [];
 
-    // Assign (or replace) the parsedResume data
-    user.parsedResume = {
-      name: parsedData.name,
-      email: parsedData.email,
-      phone: parsedData.phone,
-    };
+  return match[1]
+    .trim()
+    .split("\n")
+    .map((line) => {
+      const parts = line.match(/(.+?)\s*-\s*(.+?)\s*\((.+?)\)/);
+      return parts
+        ? { company: parts[1], role: parts[2], duration: parts[3] }
+        : null;
+    })
+    .filter(Boolean);
+};
 
-    // Save the updated user document
-    await user.save();
+const extractEducation = (text) => {
+  const match = text.match(/Education:(.*?)\n\n/s);
+  if (!match) return [];
 
-    // Send the updated parsed resume back in the response
-    res.json({ message: 'Parsed resume saved successfully!', parsedResume: user.parsedResume });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Failed to save parsed resume.' });
-  }
-});
-
-
-router.post('/', async (req, res) => {
-  try {
-      const { userId } = req.body; // Get user ID from frontend
-      const user = await User.findById(userId);
-
-      if (!user) {
-          return res.status(404).json({ message: "User not found" });
-      }
-
-      res.json({ parsedResumes: user.parsedResumes });
-  } catch (error) {
-      res.status(500).json({ message: "Server Error", error });
-  }
-});
-
-router.get("/", (req, res) => {
-  res.send("Working");
-});
-
-
+  return match[1]
+    .trim()
+    .split("\n")
+    .map((line) => {
+      const parts = line.match(/(.+?),\s*(.+?)\s*\((\d{4})\)/);
+      return parts
+        ? { degree: parts[1], university: parts[2], graduationYear: parts[3] }
+        : null;
+    })
+    .filter(Boolean);
+};
 
 module.exports = router;
