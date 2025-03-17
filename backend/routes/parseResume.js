@@ -96,4 +96,62 @@ const extractEducation = (text) => {
     .filter(Boolean);
 };
 
+router.post('/save-parsed-resume', async (req, res) => {
+  const { userId, parsedData } = req.body;
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Assign (or replace) the parsedResume data
+    user.parsedResume = {
+      name: parsedData.name || user.parsedResume?.name || "N/A",
+      email: parsedData.email || user.parsedResume?.email || "N/A",
+      phone: parsedData.phone || user.parsedResume?.phone || "N/A",
+      linkedIn: parsedData.linkedIn || user.parsedResume?.linkedIn || "N/A",
+      github: parsedData.github || user.parsedResume?.github || "N/A",
+      skills: parsedData.skills?.length ? parsedData.skills : user.parsedResume?.skills || [],
+      workExperience: parsedData.workExperience?.length ? parsedData.workExperience : user.parsedResume?.workExperience || [],
+      education: parsedData.education?.length ? parsedData.education : user.parsedResume?.education || [],
+    };
+
+    // Save the updated user document
+    await user.save();
+
+    // Send the updated parsed resume back in the response
+    res.json({ message: 'Parsed resume saved successfully!', parsedResume: user.parsedResume });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to save parsed resume.' });
+  }
+});
+
+
+
+router.post('/', async (req, res) => {
+  try {
+      const { userId } = req.body; // Get user ID from frontend
+      const user = await User.findById(userId);
+
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ parsedResumes: user.parsedResumes });
+  } catch (error) {
+      res.status(500).json({ message: "Server Error", error });
+  }
+});
+
+router.get("/", (req, res) => {
+  res.send("Working");
+});
+
+
+
 module.exports = router;
+
+
