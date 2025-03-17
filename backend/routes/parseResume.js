@@ -129,6 +129,42 @@ router.post('/save-parsed-resume', async (req, res) => {
   }
 });
 
+router.post("/getparsedresume", async (req, res) => {
+  try {
+    console.log("🟢 Received request body:", req.body);
+
+    const { userId } = req.body;
+    if (!userId) {
+      console.log("❌ User ID missing in request");
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await User.findById(userId);
+    console.log("🟢 User found:", user);
+
+    if (!user) {
+      console.log("❌ User not found in database");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.parsedResume) {
+      console.log("❌ User found but parsedResume is missing");
+      return res.status(404).json({ message: "Parsed resume not found" });
+    }
+
+    console.log("✅ Sending parsed resume:", JSON.stringify(user.parsedResume, null, 2));
+
+    // Return the parsed resume data
+    res.status(200).json({ parsedResume: user.parsedResume });
+
+  } catch (error) {
+    console.error("❌ Error fetching parsed resume:", error);
+    res.status(500).json({ message: "Server Error", error });
+  }
+});
+
+
+
 
 
 router.post('/', async (req, res) => {

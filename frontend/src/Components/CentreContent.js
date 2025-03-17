@@ -1,7 +1,7 @@
 /* global chrome */
 import React from 'react';
 
-const CentreContent = ({ parsedData, isLoading, file, handleFileChange, handleFileUpload, userId }) => {
+const CentreContent = ({ parsedData, isLoading, file, handleFileChange, handleFileUpload, userId,handleAutofill }) => {
   
   const handleGoToDashboard = () => {
     if (!userId) {
@@ -40,6 +40,9 @@ const CentreContent = ({ parsedData, isLoading, file, handleFileChange, handleFi
             disabled={isLoading || !file}
           >
             {isLoading ? "Uploading..." : "Upload and Parse Resume"}
+          </button>
+          <button onClick={handleAutofill} className="upload-btn">
+            Autofill Forms
           </button>
 
           <button onClick={handleGoToDashboard} className="dashboard">Go To Dashboard</button>

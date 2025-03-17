@@ -5,24 +5,102 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test Autofill Form</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <h2>Test Autofill Form</h2>
-  <form id="jobApplicationForm">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" placeholder="Enter your name"><br><br>
-  
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" placeholder="Enter your email"><br><br>
-  
-    <label for="phone">Phone:</label>
-    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number"><br><br>
-  
-    <button type="button" id="autofillButton">Autofill Form</button>
-  </form>
-  
-  <script>
-    // Your JavaScript goes here
-  </script>
+  <div class="container">
+    <h2>Test Autofill Form</h2>
+    <form id="jobApplicationForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" placeholder="Enter your name">
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email">
+
+      <label for="phone">Phone:</label>
+      <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+
+      <label for="linkedin">LinkedIn Profile:</label>
+      <input type="url" id="linkedin" name="linkedIn" placeholder="Enter LinkedIn profile URL">
+
+      <label for="github">GitHub Profile:</label>
+      <input type="url" id="github" name="github" placeholder="Enter GitHub profile URL">
+
+      <label for="skills">Skills:</label>
+      <textarea id="skills" name="skills" placeholder="Enter your skills (comma-separated)"></textarea>
+
+      <h3>Work Experience</h3>
+      <label for="company">Company Name:</label>
+      <input type="text" id="company" name="workExperience.company" placeholder="Enter company name">
+
+      <label for="role">Job Role:</label>
+      <input type="text" id="role" name="workExperience.role" placeholder="Enter job role">
+
+      <label for="duration">Work Duration:</label>
+      <input type="text" id="duration" name="workExperience.duration" placeholder="Enter work duration (e.g., 2 years)">
+
+      <h3>Education</h3>
+      <label for="degree">Degree:</label>
+      <input type="text" id="degree" name="education.degree" placeholder="Enter your degree">
+
+      <label for="university">University Name:</label>
+      <input type="text" id="university" name="education.university" placeholder="Enter university name">
+
+      <label for="grad_year">Graduation Year:</label>
+      <input type="number" id="grad_year" name="education.graduationYear" placeholder="Enter graduation year">
+
+      <button type="button" id="autofillButton">Autofill Form</button>
+    </form>
+  </div>
 </body>
 </html>

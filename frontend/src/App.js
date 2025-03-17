@@ -64,19 +64,7 @@ function App() {
     }
   };
 
-  // Save parsed data to Chrome storage for autofill
-  const handleSaveToStorage = () => {
-    if (!parsedData) {
-      alert("No parsed data to save.");
-      return;
-    }
-
-    chrome.storage.local.set({ parsedData }, () => {
-      console.log("Parsed data saved to storage:", parsedData); // For debugging
-      alert("Parsed data saved for autofill!");
-    });
-    console.log(parsedData);
-  };
+ 
 
   const handleSaveToDashboard = async () => {
     if (!isLoggedIn) {
@@ -122,24 +110,64 @@ function App() {
 
   
   // Trigger autofill on current webpage by sending message to content script
-  const handleAutofill = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      // Ensure the active tab exists
-      if (tabs.length > 0) {
-        console.log(tabs);  // Log the tabs array to check if the active tab is found
+  const handleAutofill = async () => {
+    try {
+      const userId = userID; // Replace with actual user ID, or fetch from storage
+      console.log("Sending request to backend with userId:", userId);
 
-        chrome.tabs.sendMessage(tabs[0].id, { action: "autofill" }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.error("Error sending message:", chrome.runtime.lastError);
-          } else {
-            console.log("Message sent successfully to content script");
-          }
-        });
-      } else {
-        console.error("No active tab found");
+      // Fetch parsed resume from backend
+      const response = await fetch("http://localhost:5000/api/getparsedresume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }), // Send userId to get the resume data
+      });
+
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        console.error("Server returned error:", response.status);
+        return;
       }
-    });
-  };
+
+      const data = await response.json();
+      console.log("Response data received:", data);
+
+      if (!data || !data.parsedResume) {
+        console.error("No parsed data received from backend");
+        return;
+      }
+
+      console.log("Parsed resume data received:", data);
+  
+      // Get the active tab
+      const tabs = await new Promise((resolve) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => resolve(tabs));
+      });
+
+      if (tabs.length === 0) {
+        console.error("No active tab found");
+        return;
+      }
+
+      // Send parsed resume data to content script
+      const tabId = tabs[0].id;
+      const message = { action: "autofill", data: data.parsedResume };
+
+      chrome.tabs.sendMessage(tabId, message, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error("Error sending message:", chrome.runtime.lastError);
+        } else {
+          console.log("Data sent to content script for autofill");
+        }
+      });
+    } catch (error) {
+      console.error("Error during autofill process:", error);
+    }
+};
+
+  
   
 
   // Add this to handle login success
@@ -180,12 +208,13 @@ function App() {
         handleFileUpload={handleFileUpload}
         handleFileChange={handleFileChange}
         userId={userID}
+        handleAutofill={handleAutofill}
         />
 
       <ParsedDataDisplay
         parsedData={parsedData}
-        handleSaveToStorage={handleSaveToStorage}
-        handleAutofill={handleAutofill} 
+       
+        
         handleSaveToDashboard={handleSaveToDashboard}
          />
     </div>
