@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+  <title>Dashboard - Edit Resume</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .container {
+      width: 60%;
+      margin: auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .section-title {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Dashboard - Edit Parsed Resume</h2>
+
+    <!-- Success or Error Message -->
+    <% if (message) { %>
+      <div class="alert <%= isSuccess ? 'alert-success' : 'alert-error' %>">
+        <%= message %>
+      </div>
+    <% } %>
+
+    <form id="resumeForm" action="/update-resume/<%= userId %>" method="POST">
+      
+      <!-- Basic Fields -->
+      <div class="form-group">
+        <label>Name:</label>
+        <input type="text" id="name" name="name" value="<%= parsedResume.name %>" />
+      </div>
+
+      <div class="form-group">
+        <label>Email:</label>
+        <input type="text" id="email" name="email" value="<%= parsedResume.email %>" />
+      </div>
+
+      <div class="form-group">
+        <label>Phone:</label>
+        <input type="text" id="phone" name="phone" value="<%= parsedResume.phone %>" />
+      </div>
+
+      <div class="form-group">
+        <label>LinkedIn:</label>
+        <input type="text" id="linkedIn" name="linkedIn" value="<%= parsedResume.linkedIn %>" />
+      </div>
+
+      <div class="form-group">
+        <label>GitHub:</label>
+        <input type="text" id="github" name="github" value="<%= parsedResume.github %>" />
+      </div>
+
+      <!-- Skills -->
+      <div class="section-title">Skills</div>
+      <textarea id="skills" name="skills" rows="3"><%= parsedResume.skills.join(", ") %></textarea>
+
+      <!-- Work Experience -->
+      <div class="section-title">Work Experience</div>
+      <% parsedResume.workExperience.forEach((work, index) => { %>
+        <div class="form-group">
+          <label>Company:</label>
+          <input type="text" name="workExperience[<%= index %>][company]" value="<%= work.company %>" />
+          <label>Role:</label>
+          <input type="text" name="workExperience[<%= index %>][role]" value="<%= work.role %>" />
+          <label>Duration:</label>
+          <input type="text" name="workExperience[<%= index %>][duration]" value="<%= work.duration %>" />
+        </div>
+      <% }) %>
+
+      <!-- Education -->
+      <div class="section-title">Education</div>
+      <% parsedResume.education.forEach((edu, index) => { %>
+        <div class="form-group">
+          <label>Degree:</label>
+          <input type="text" name="education[<%= index %>][degree]" value="<%= edu.degree %>" />
+          <label>University:</label>
+          <input type="text" name="education[<%= index %>][university]" value="<%= edu.university %>" />
+          <label>Graduation Year:</label>
+          <input type="text" name="education[<%= index %>][graduationYear]" value="<%= edu.graduationYear %>" />
+        </div>
+      <% }) %>
+
+      <button type="submit">Save Resume</button>
+    </form>
+  </div>
+</body>
+</html>
